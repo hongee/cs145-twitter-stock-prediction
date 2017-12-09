@@ -2,6 +2,7 @@ import json
 import os
 import math
 import matplotlib.pylab as plt
+import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 import multiprocessing as mp
@@ -50,16 +51,18 @@ def filter(filenameout):
     scorelist = list()
     base = 0;
 
-    #nltk.download() #<--You may need to run this first to get it to work.
+    # nltk.download() #<--You may need to run this first to get it to work.
     sid = SentimentIntensityAnalyzer()
 
-    files = os.listdir(os.getcwd())     #Looks at current directory. Change this to whatever directory your code is.
-    files.sort(key=lambda x: os.path.getmtime(x))   #Sorts by time created.
+    # pathname = os.getcwd()  #Looks at current directory. Change this to whatever directory your code is.
+    pathname = "../amd/"
+    files = os.listdir(pathname)
+    files.sort(key=lambda x: os.path.getmtime(pathname + x))   #Sorts by time created.
 
     for filename in files:
         if filename.endswith(".txt"):
             print filename
-            with open(filename, 'r') as input:
+            with open(pathname + filename, 'r') as input:
                 for tweet in input:
                      try:
                         old_data = []
@@ -102,13 +105,14 @@ def filter(filenameout):
     # plt.plot(z,w)
     # plt.show()
 
-    df = get_google_finance_intraday("NVDA", 3600, 35)  # Zhang's code for getting the google finance thing.
-    df.to_csv("./nvda_stock_data.csv")
-    with open('nvda_stock_data.csv', 'rb') as input:
+    df = get_google_finance_intraday("AMD", 3600, 35)  # Zhang's code for getting the google finance thing.
+    df.to_csv("./amd_stock_data.csv")
+    with open('amd_stock_data.csv', 'rb') as input:
         reader = csv.reader(input)
         for row in reader:
             for key in datax:
                 print "Key:" + str(datax[key][1])
+                print row[0]
                 if str(row[0]) == str(datax[key][1]):
                     riseorfall = 1 if float(row[4]) - float(row[1]) > 0 else -1
                     scorelist.append((row[0], datax[key][0], riseorfall))
@@ -120,5 +124,5 @@ def filter(filenameout):
             output.write(' '.join(str(s) for s in item) + '\n')
 
 if __name__ == '__main__':
-    filename = "scorelist.txt"  #name of file you will be getting results in.
+    filename = "amd-scorelist.txt"  #name of file you will be getting results in.
     filter(filename)

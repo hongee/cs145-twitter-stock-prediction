@@ -1,0 +1,3 @@
+run.sh runs an example of the crawler.
+
+In particular, it searches for 50 tweets related to Nvidia.
