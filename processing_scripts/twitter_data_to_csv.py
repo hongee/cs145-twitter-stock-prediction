@@ -12,13 +12,22 @@ def read_stock_data(path):
 
 def file_writer_process(q, path):
     file_path = path + ".csv"
-    fieldnames = ["created_at", "text", "stock_val", "stock_val_1hr_delta", "stock_val_2hr_delta", "stock_val_6hr_delta"]
+    fieldnames = ["created_at", "text", "stock_val", "stock_val_1hr_delta", "stock_val_2hr_delta", "stock_val_6hr_delta", "after_hours"]
     print "Output to %s" % file_path
     with open(file_path, 'wb') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
+        count = 0
         while 1:
-            d = q.get()
+            try:
+                d = q.get()
+            except (KeyboardInterrupt, SystemExit):
+                print("Printer Exiting...")
+                break
+
+            count += 1
+            if count % 10000 == 0:
+                print "Processed %d so far..." % count
             if d == "done":
                 break
             try:
@@ -30,17 +39,22 @@ def file_writer_process(q, path):
     return
     
 def parse_and_query_stock(lineq, writequeue, stock_data):
+    processed = 0
     while True:
-        line = lineq.get()
+        try:
+            line = lineq.get()
+        except (KeyboardInterrupt, SystemExit):
+            print("Worker Exiting...")
+            break
         afterhours = False
         if line == "done":
             lineq.task_done()
-            return
+            break
 
         data = json.loads(line)
         if data.get('lang') != "en":
             lineq.task_done()
-            return
+            continue
         timestamp = int(data.get("timestamp_ms"))//1000
         try:
             posted_time = datetime.fromtimestamp(timestamp)
@@ -62,7 +76,6 @@ def parse_and_query_stock(lineq, writequeue, stock_data):
             current_stock = stock_data.iloc[stock_data.index.get_loc(posted_time,method='nearest')]
             if current_stock.name.day != posted_time.day:
                 # Not a trading day
-                print "TD"
                 lineq.task_done()
                 continue
             in_1_hour = posted_time + timedelta(0, 60*5)
@@ -79,15 +92,17 @@ def parse_and_query_stock(lineq, writequeue, stock_data):
                 "stock_val": curr,
                 "stock_val_1hr_delta": in_1_hour_d,
                 "stock_val_2hr_delta": in_2_hour_d,
-                "stock_val_6hr_delta": in_6_hour_d
+                "stock_val_6hr_delta": in_6_hour_d,
+                "after_hours": afterhours
             })
             lineq.task_done()
+            processed += 1
 
         except Exception as e:
             print e
             lineq.task_done()
             continue
-    return
+    return processed
 
 
 
@@ -109,12 +124,14 @@ def process_data(path, stock_data):
         for i, line in enumerate(twitter_data):
             line_queue.put(line)
 
-    line_queue.put("done")
-    queue.put("done")
-
     for j in jobs:
-        j.get()
+        line_queue.put("done")
 
+    for i,j in enumerate(jobs):
+        res = j.get()
+        print "Job %d processed %d entries." % (i, res)
+
+    queue.put("done")
     pool.close()
 
 
