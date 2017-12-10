@@ -55,7 +55,7 @@ def filter(filenameout):
     sid = SentimentIntensityAnalyzer()
 
     # pathname = os.getcwd()  #Looks at current directory. Change this to whatever directory your code is.
-    pathname = "../amd/"
+    pathname = "../nvda/"
     files = os.listdir(pathname)
     files.sort(key=lambda x: os.path.getmtime(pathname + x))   #Sorts by time created.
 
@@ -71,7 +71,7 @@ def filter(filenameout):
                         timestamp1 = old_data[0]['created_at']
                         timestamp1 = timestamp1[0:19] + timestamp1[25:30]
                         t1 = datetime.datetime.strptime(timestamp1, "%a %b %d %H:%M:%S %Y")
-                        t1 = t1.replace(minute=0, second=0, microsecond=0)
+                        t1 = t1.replace(hour = t1.hour - 8,minute=0, second=0, microsecond=0)
                         index = str(t1.strftime("%m") + t1.strftime("%d") + t1.strftime("%H"))
                         # scores_formatted = "{\"neg\": " + str(ss['neg']) + ", \"neu\": " + str(
                         #     ss['neu']) + ", \"pos\": " + str(ss['pos']) \
@@ -106,8 +106,8 @@ def filter(filenameout):
     # plt.show()
 
     df = get_google_finance_intraday("AMD", 3600, 35)  # Zhang's code for getting the google finance thing.
-    df.to_csv("./amd_stock_data.csv")
-    with open('amd_stock_data.csv', 'rb') as input:
+    df.to_csv("./nvda_stock_data.csv")
+    with open('nvda_stock_data.csv', 'rb') as input:
         reader = csv.reader(input)
         for row in reader:
             for key in datax:
@@ -124,5 +124,5 @@ def filter(filenameout):
             output.write(' '.join(str(s) for s in item) + '\n')
 
 if __name__ == '__main__':
-    filename = "amd-scorelist.txt"  #name of file you will be getting results in.
+    filename = "nvda-scorelist.txt"  #name of file you will be getting results in.
     filter(filename)
