@@ -105,14 +105,13 @@ def filter(filenameout):
     # plt.plot(z,w)
     # plt.show()
 
-    df = get_google_finance_intraday("AMD", 3600, 35)  # Zhang's code for getting the google finance thing.
+    df = get_google_finance_intraday("NVDA", 3600, 35)  # Zhang's code for getting the google finance thing.
     df.to_csv("./nvda_stock_data.csv")
     with open('nvda_stock_data.csv', 'rb') as input:
         reader = csv.reader(input)
         for row in reader:
             for key in datax:
                 print "Key:" + str(datax[key][1])
-                print row[0]
                 if str(row[0]) == str(datax[key][1]):
                     riseorfall = 1 if float(row[4]) - float(row[1]) > 0 else -1
                     scorelist.append((row[0], datax[key][0], riseorfall))
