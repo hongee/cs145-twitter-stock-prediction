@@ -54,6 +54,6 @@ def get_google_finance_intraday(ticker, period=60, days=1):
     else:
         return pd.DataFrame(rows, index=pd.DatetimeIndex(times, name='Date'))
 
-
+# Modify this for AMD/NVDA
 df = get_google_finance_intraday("AMD", 300, 30)
 df.to_csv("./amd_stock_data.csv")
