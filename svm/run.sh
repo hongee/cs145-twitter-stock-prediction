@@ -1,1 +1,1 @@
-python ./filter.py
+python ./SVM.py
