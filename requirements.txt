@@ -80,7 +80,7 @@ six==1.11.0
 smart-open==1.5.5
 statsmodels==0.8.0
 subprocess32==3.2.7
-tensorflow==1.4.1
+tensorflow==1.15.0
 tensorflow-tensorboard==0.4.0rc3
 terminado==0.8.1
 testpath==0.3.1
